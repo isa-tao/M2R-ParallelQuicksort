@@ -194,4 +194,43 @@ So let's try to parse in an other way and use gnuplot:
 
 Well, I'm not sure it is nicer but I have lines. A first crude
 analysis seems to reveal the the parallel version is worth it for
-arrays larger than 400000.
+arrays larger than 40000
+
+
+** 2014-10-29
+*** first execution on my laptop
+- Here is a typical first execution on my laptop(an Intel(R) Core(TM)2
+  Duo CPU P8600 2.40GHz * 2 running a Debian with Linux 3.2.0):
+  =./src/parallelQuicksort= 
+  It returns an error message:
+  =ERROR; return code from pthread_create() is 11=
+- When I run the code with a much smaller argument on my laptop:
+  #+begin_src sh :results output :exports both 
+    ./src/parallelQuicksort 500
+  #+end_src
+
+  #+RESULTS:
+  : Sequential quicksort took: 0.000086 sec.
+  : Parallel quicksort took: 0.019785 sec.
+  : Built-in quicksort took: 0.000207 sec.
+- I found that the error is caused by "The system lacked the
+  necessary resources to create another thread, or the system-imposed
+  limit on the total number of threads in a process PTHREAD_THREADS_MAX
+  would be exceeded."
+  ref: http://stackoverflow.com/questions/7038586/return-code-from-pthread-create-is-11
+- To increase the value of PTHREAD_THREADS_MAX per process in Linux, I
+  have changed the value in the file =/proc/sys/kernel/threads-max= from
+  =64513= to =120000= and have decreased stack size by the command =ulimit -v newvalue=
+  ref: http://stackoverflow.com/questions/344203/maximum-number-of-threads-per-process-in-linux
+  #+begin_src sh :results output :exports both
+    ulimit -s 256
+    ./src/parallelQuicksort
+  #+end_src
+
+  #+RESULTS:
+  : Sequential quicksort took: 0.333926 sec.
+  : Parallel quicksort took: 0.278951 sec.
+  : Built-in quicksort took: 0.387445 sec.
+
+*** execution on G5000
+
