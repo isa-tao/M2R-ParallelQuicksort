@@ -253,12 +253,12 @@ Legrand and modified it to avoid the error =11=.
       done ;
   done
 #+end_src
-I obtained the following [[file:data/debian_2014-11-02/measurements_16:17.txt][output]].
+I obtained the following [[file:data/debian_2014-10-29/measurements_16:17.txt][output]].
 
 *** Analyse the result with gnuplot
 I have reused the script [[file:scripts/csv_quicksort_extractor2.pl][csv_quicksort_extractor2.pl]]
 #+begin_src sh :results output raw :exports both 
-  FILENAME="data/debian_2014-11-02/measurements_16:17"
+  FILENAME="data/debian_2014-10-29/measurements_16:17"
   perl scripts/csv_quicksort_extractor2.pl < "$FILENAME.txt" > "${FILENAME}_wide.csv"
   echo "
     set terminal png size 600,400 
@@ -271,7 +271,7 @@ I have reused the script [[file:scripts/csv_quicksort_extractor2.pl][csv_quickso
 #+end_src
 
 #+RESULTS:
-[[file:data/debian_2014-11-02/measurements_16:17_wide.png]]
+[[file:data/debian_2014-10-29/measurements_16:17_wide.png]]
 
 From this first analyse, it seems that the parallel version is running
 faster for arrays larger than 600000.
@@ -290,10 +290,10 @@ Run the series of experiments on Grid5000:
       done ;
   done
 #+end_src
-I obtained the following [[file:data/sagittaire-78.lyon.grid5000.fr_2014-11-02/measurements_17:47.txt][output]], and used the same script to parse
+I obtained the following [[file:data/sagittaire-78.lyon.grid5000.fr_2014-10-29/measurements_17:47.txt][output]], and used the same script to parse
 this result:
 #+begin_src sh :results output raw :exports both 
-  FILENAME="data/sagittaire-78.lyon.grid5000.fr_2014-11-02/measurements_17:47"
+  FILENAME="data/sagittaire-78.lyon.grid5000.fr_2014-10-29/measurements_17:47"
   perl scripts/csv_quicksort_extractor2.pl < "$FILENAME.txt" > "${FILENAME}_wide.csv"
   echo "
     set terminal png size 600,400 
@@ -306,7 +306,7 @@ this result:
 #+end_src
 
 #+RESULTS:
-[[file:data/sagittaire-78.lyon.grid5000.fr_2014-11-02/measurements_17:47_wide.png]]
+[[file:data/sagittaire-78.lyon.grid5000.fr_2014-10-29/measurements_17:47_wide.png]]
 
 We could find that the performance of the sequential paralle version
 and sequential version didn't change much, but the performance of libc
@@ -341,7 +341,7 @@ The experiments is done on my local machine.
 
 #+RESULTS:
 
-Here is the [[file:data/debian_2014-11-02/measurements_20:21.txt][output]]. Let's parse this result:
+Here is the [[file:data/debian_2014-11-02/measurements_20:32.txt][output]]. Let's parse this result:
 #+begin_src sh :results output raw :exports both 
   FILENAME="data/debian_2014-11-02/measurements_20:32"
   perl scripts/csv_quicksort_extractor2.pl < "$FILENAME.txt" > "${FILENAME}_wide.csv"
