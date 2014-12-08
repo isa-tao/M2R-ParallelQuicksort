@@ -534,6 +534,7 @@ m+geom_histogram() + facet_grid(~Type)
 
 #+RESULTS:
 [[file:data/debian_2014-11-15/measurements_23:52.png]]
+
 The result seems to be acceptable now.
 
 *** Confidence Intervals
