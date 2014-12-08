@@ -359,3 +359,203 @@ Here is the [[file:data/debian_2014-11-02/measurements_20:32.txt][output]]. Let'
 [[file:data/debian_2014-11-02/measurements_20:32_wide.png]]
 
 
+
+
+** 2014-11-09
+*** information collection
+The parameters that may influence the experiment results:
+- Host information
+  - CPU type
+  - cache size
+  - number of threads
+  - RAM
+- OS kernel version
+- workload
+  - dedicated or not
+  - deamons
+- Compiler
+  - version
+  - options
+- Input
+Here I think that the most important parameters that we should study
+are: 
+=- the number of processors p; 
+ - number of threads; 
+ - the input size(the size of the array n).
+ - the method to calculate the time(in the current version the
+   function gettimeofday() is used)=
+First I want to fix the experiment environment as my local machine(p=2),
+and fix the number of threads, to study the relation between
+execution time T and the size of the array n.
+*** relation between T and n
+I want to find whether it's the linear relation between T and n, in the
+initial experiment, the array size use log-scale, so I want to change
+it to be linear. From the experiment before, I redo the experiment for the size of
+arrays between 100000 and 800000.
+
+#+begin_src sh foo :results output :exports both :tangle scripts/run_benchmarking.sh
+  ulimit -s 256
+  OUTPUT_DIRECTORY=data/`hostname`_`date +%F`
+  mkdir -p $OUTPUT_DIRECTORY
+  OUTPUT_FILE=$OUTPUT_DIRECTORY/measurements_`date +%R`.txt
+
+  touch $OUTPUT_FILE
+  for i in `seq 100000 100000 800000`; do
+      for rep in `seq 1 10`; do
+          echo "Size: $i" >> $OUTPUT_FILE;
+          ./src/parallelQuicksort $i >> $OUTPUT_FILE;
+      done ;
+  done
+#+end_src
+
+#+RESULTS:
+
+Here is the [[file:data/debian_2014-11-09/measurements_19:07.txt][output]]. The graphic before is not quite clear, so I choose
+to visualize it using ggplot2.
+
+#+begin_src sh :results output raw :exports both 
+  FILENAME="data/debian_2014-11-09/measurements_19:07"
+  perl scripts/csv_quicksort_extractor.pl < "$FILENAME.txt" > "${FILENAME}.csv"
+#+end_src
+
+#+RESULTS:
+ 
+#+begin_src R :results output graphics :file data/debian_2014-11-09/measurements_19:07.png :exports both :width 600 :height 400
+library(plyr)
+library(ggplot2)
+df <- read.csv("~/Dropbox/mosig/performance evaluation/M2R-ParallelQuicksort/data/debian_2014-11-09/measurements_19:07.csv")
+splitDf <- ddply(df, .(Size, Type), summarize, mean=mean(Time), sd=sd(Time))
+p <- ggplot(splitDf, aes(x=Size, y=mean, colour=Type))
+limits <- aes(ymax = mean + sd, ymin=mean - sd)
+p + geom_line() + geom_errorbar(limits, width=0.2) + labs(x = "Array Size", y = "Execution Time")
+#+end_src
+
+#+RESULTS:
+[[file:data/debian_2014-11-09/measurements_19:07.png]]
+ref:
+http://stats.stackexchange.com/questions/8225/how-to-summarize-data-by-group-in-r #How
+to summarize data by group in R(using ddply or data.table)
+http://docs.ggplot2.org/current/geom_errorbar.html #error bars
+http://docs.ggplot2.org/current/theme.html #Change the axis labels
+
+From the [[file:data/debian_2014-11-09/measurements_19:07.png][graphic]], we could see that the relation between the data set
+behaves like a linear curve, and the parallel version turns to perform
+best when array size is bigger than 600000. But we should notice that
+the variation seems large when array size is bigger than 700000.
+  
+*** TODO
+- find how to change number of processors, and number of threads to
+  study their relations with the performance.
+- find other methods to calculate the time.
+
+** 2014-11-15
+In the course of 2014-11-10, the professor talked about the confidence
+interval of the mesured random values. In the diagram that I made last
+week, I have used [μ - σ, μ + σ] as the confidence interval which is
+not accurate, so I want to improve it.
+*** Histogram
+First, I decide to increase the number of replicates of the experiment
+to 30, and to study its histogram.
+#+begin_src sh foo :results output :exports both :tangle scripts/run_benchmarking.sh
+  ulimit -s 256
+  OUTPUT_DIRECTORY=data/`hostname`_`date +%F`
+  mkdir -p $OUTPUT_DIRECTORY
+  OUTPUT_FILE=$OUTPUT_DIRECTORY/measurements_`date +%R`.txt
+
+  touch $OUTPUT_FILE
+  for i in `seq 100000 100000 800000`; do
+      for rep in `seq 1 30`; do
+          echo "Size: $i" >> $OUTPUT_FILE;
+          ./src/parallelQuicksort $i >> $OUTPUT_FILE;
+      done ;
+  done
+#+end_src
+
+#+RESULTS:
+
+Here is the [[file:data/debian_2014-11-15/measurements_23:25.txt][output]].
+
+#+begin_src sh :results output raw :exports both 
+  FILENAME="data/debian_2014-11-15/measurements_23:25"
+  perl scripts/csv_quicksort_extractor.pl < "$FILENAME.txt" > "${FILENAME}.csv"
+#+end_src
+
+#+RESULTS:
+ 
+#+begin_src R :results output graphics :file data/debian_2014-11-15/measurements_23:25.png :exports both :width 800 :height 400
+library(plyr)
+library(ggplot2)
+df <- read.csv("~/Dropbox/mosig/performance evaluation/M2R-ParallelQuicksort/data/debian_2014-11-15/measurements_23:25.csv")
+s <- subset(df, Size == 800000)
+m<-ggplot(s,aes(x=Time))
+m+geom_histogram() + facet_grid(~Type)
+#+end_src
+
+#+RESULTS:
+[[file:data/debian_2014-11-15/measurements_23:25.png]]
+We could see that the version sequential is most close to the normal
+distribution, the version Parallel is least close to the normal
+distribution. So I try to increase the number of replicates of the experiment
+to 50, and to study its histogram.
+#+begin_src sh foo :results output :exports both :tangle scripts/run_benchmarking.sh
+  ulimit -s 256
+  OUTPUT_DIRECTORY=data/`hostname`_`date +%F`
+  mkdir -p $OUTPUT_DIRECTORY
+  OUTPUT_FILE=$OUTPUT_DIRECTORY/measurements_`date +%R`.txt
+
+  touch $OUTPUT_FILE
+  for i in `seq 100000 100000 800000`; do
+      for rep in `seq 1 50`; do
+          echo "Size: $i" >> $OUTPUT_FILE;
+          ./src/parallelQuicksort $i >> $OUTPUT_FILE;
+      done ;
+  done
+#+end_src
+
+#+RESULTS:
+
+#+begin_src sh :results output raw :exports both 
+  FILENAME="data/debian_2014-11-15/measurements_23:52"
+  perl scripts/csv_quicksort_extractor.pl < "$FILENAME.txt" > "${FILENAME}.csv"
+#+end_src
+
+#+RESULTS:
+ 
+#+begin_src R :results output graphics :file data/debian_2014-11-15/measurements_23:52.png :exports both :width 800 :height 400
+library(plyr)
+library(ggplot2)
+df <- read.csv("~/Dropbox/mosig/performance evaluation/M2R-ParallelQuicksort/data/debian_2014-11-15/measurements_23:52.csv")
+s <- subset(df, Size == 800000)
+m<-ggplot(s,aes(x=Time))
+m+geom_histogram() + facet_grid(~Type)
+#+end_src
+
+#+RESULTS:
+[[file:data/debian_2014-11-15/measurements_23:52.png]]
+The result seems to be acceptable now.
+
+*** Confidence Intervals
+Now I change the confidence interval to be  [μ - 2σ/√50, μ + 2σ/√50],
+and redraw the diagram to compare the three versions.
+#+begin_src R :results output graphics :file data/debian_2014-11-15/measurements_23:52_compare.png :exports both :width 600 :height 400
+library(plyr)
+library(ggplot2)
+df <- read.csv("~/Dropbox/mosig/performance evaluation/M2R-ParallelQuicksort/data/debian_2014-11-15/measurements_23:52.csv")
+splitDf <- ddply(df, .(Size, Type), summarize, mean=mean(Time), sd=sd(Time))
+p <- ggplot(splitDf, aes(x=Size, y=mean, colour=Type))
+limits <- aes(ymax = mean + 2 * sd/(50^0.5), ymin=mean - 2 * sd/(50^0.5))
+p + geom_line() + geom_errorbar(limits, width=0.2) + labs(x = "Array Size", y = "Execution Time")
+#+end_src
+
+#+RESULTS:
+[[file:data/debian_2014-11-15/measurements_23:52_compare.png]]
+Now we could see that for the array size of 600000, the confidence
+intervals of version of parallel and sequential don't overlap, so we
+could say that at this time the parallel version is better with the
+probability over 90%.
+
+*** TODO
+- find how to change number of processors, and number of threads to
+  study their relations with the performance.
+- find other methods to calculate the time.
+- compute the speedup and efficiency for the parallel versions.
