@@ -432,6 +432,7 @@ p + geom_line() + geom_errorbar(limits, width=0.2) + labs(x = "Array Size", y = 
 
 #+RESULTS:
 [[file:data/debian_2014-11-09/measurements_19:07.png]]
+
 ref:
 http://stats.stackexchange.com/questions/8225/how-to-summarize-data-by-group-in-r #How
 to summarize data by group in R(using ddply or data.table)
@@ -493,6 +494,7 @@ m+geom_histogram() + facet_grid(~Type)
 
 #+RESULTS:
 [[file:data/debian_2014-11-15/measurements_23:25.png]]
+
 We could see that the version sequential is most close to the normal
 distribution, the version Parallel is least close to the normal
 distribution. So I try to increase the number of replicates of the experiment
@@ -549,6 +551,7 @@ p + geom_line() + geom_errorbar(limits, width=0.2) + labs(x = "Array Size", y = 
 
 #+RESULTS:
 [[file:data/debian_2014-11-15/measurements_23:52_compare.png]]
+
 Now we could see that for the array size of 600000, the confidence
 intervals of version of parallel and sequential don't overlap, so we
 could say that at this time the parallel version is better with the
